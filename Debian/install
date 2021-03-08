@@ -10,5 +10,6 @@ cd Debian
 
 ln -s /usr/local/libexec/tlb /usr/sbin
 cp tlb /etc/init.d/
+chmod +x /etc/init.d/tlb
 
 update-rc.d tlb defaults

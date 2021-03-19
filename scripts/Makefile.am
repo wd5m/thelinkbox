@@ -1,4 +1,8 @@
 # $Log: Makefile.am,v $
+# Revision 1.6  2021/03/18 15:03:41  wd5m
+# Added tlbevent.sh example for transcode linking.
+#
+# $Log: Makefile.am,v $
 # Revision 1.5  2010/03/13 15:03:41  wb6ymh
 # Added saytime.sh example.
 #
@@ -18,5 +22,5 @@
 
 EXTRA_DIST = getnews.sh phonetic.us phonetic.ansi phonetic.ham usermgmt.cgi \
              README freqctrl.sh prefix.sh regen.cmds regen.sh voiceid.sh \
-	     saytime.sh
+	     saytime.sh tlbevent.sh
 

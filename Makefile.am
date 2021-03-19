@@ -52,7 +52,7 @@ SUBDIRS += linkbox tlbcmd scripts
 
 sysconf_DATA = tlb.conf.sample tlb.cmds.sample port.conf.sample
 
-EXTRA_DIST = bootstrap.sh FreeBSD Debian RedHat TODO cm108.conf.sample iMic.conf.sample \
+EXTRA_DIST = bootstrap.sh Debian FreeBSD RedHat TODO cm108.conf.sample iMic.conf.sample \
 	irlp.conf.sample wb2rem.conf.sample tlb.conf.sample \
 	tlb.cmds.sample port.conf.sample SCRIPTING.txt rigblaster.conf.sample \
 	voip.conf.sample

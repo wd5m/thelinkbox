@@ -1,4 +1,12 @@
 # $Log: Makefile.am,v $
+# Revision 1.11  2021/03/18 19:36:21  wd5m
+# Add Debian directory to dist
+#
+# $Log: Makefile.am,v $
+# Revision 1.10  2021/03/13 19:36:21  wd5m
+# Add bootstrap.sh
+#
+# $Log: Makefile.am,v $
 # Revision 1.9  2010/01/14 19:36:21  wb6ymh
 # Modified to use the Pentium performance counter based hrprof library for
 # profiling.
@@ -44,7 +52,7 @@ SUBDIRS += linkbox tlbcmd scripts
 
 sysconf_DATA = tlb.conf.sample tlb.cmds.sample port.conf.sample
 
-EXTRA_DIST = FreeBSD RedHat TODO cm108.conf.sample iMic.conf.sample \
+EXTRA_DIST = bootstrap.sh FreeBSD Debian RedHat TODO cm108.conf.sample iMic.conf.sample \
 	irlp.conf.sample wb2rem.conf.sample tlb.conf.sample \
 	tlb.cmds.sample port.conf.sample SCRIPTING.txt rigblaster.conf.sample \
 	voip.conf.sample

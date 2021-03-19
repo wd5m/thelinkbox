@@ -19,6 +19,19 @@
    http://CQiNet.sourceforge.net
 
    $Log: conference.c,v $
+   Revision 1.73  2021/03/15 18:49:48  wd5m
+   1. Updated RTP_Data function to cause non EchoLink nodes to
+   update the talking (->) indicator on EchoLink users node display.
+
+   $Log: conference.c,v $
+   Revision 1.71  2021/03/11 18:49:48  wd5m
+   1. Modified CmdStats to display overall statistics similar to LogStats
+
+   $Log: conference.c,v $
+   Revision 1.70  2021/03/10 18:49:48  wd5m
+   1. Corrected minor typo in LOG_ERR statement for SFBind2IP
+
+   $Log: conference.c,v $
    Revision 1.69  2012/12/09 18:49:48  wb6ymh
    1. Removed old chan_rptdir style Asterisk support.
    2. Don't set bDynamicConf in RtpInit. Prevents conference from being
@@ -995,7 +1008,7 @@ int CreateServerClient(ConfServer *pCS,int Port,int bLocal,ClientInfo **pRet)
          MyAdr.ADDR = inet_addr(SFBind2IP);
          if(MyAdr.ADDR == INADDR_NONE) {
             LOG_ERROR(("CreateServerClient(): failed to convert \"%s\" to IP "
-                       "address.\n",Bind2IP));
+                       "address.\n",SFBind2IP));
             Err = ERR_BIND_IP;
             break;
          }
@@ -1896,6 +1909,15 @@ void RTP_Data(ClientInfo *p,ConfServer *pCS,ConfClient *pLookup)
       }
 
       if(Type == PKT_TYPE_AUDIO || Type == PKT_TYPE_OTHER_AUDIO) {
+         if (ClientTalking == NULL) {
+            // set this one as talking and update the StationList
+            ClientTalking = pSource;
+            pCS->bSendStationList = TRUE;
+            // Move him to the top of the station list
+            RemoveFromStationList(pSource);
+            pSource->Link = StationList;
+            StationList = pSource;
+         }
          EndPoint(p,pSource,EVENT_RTP_RX);
       }
    }
@@ -3794,11 +3816,11 @@ void CmdShutdown(ClientInfo *p,ConfClient *pCC1,char *Arg)
 void CmdStats(ClientInfo *p,ConfClient *pCC1,char *Arg)
 {
    ConfServer *pCS = (ConfServer *) p->p;
-   u_int TxBytes = pCS->TxBytes;
-   u_int TxMBytes = pCS->TxMBytes;
-   u_int RxBytes = pCS->RxBytes;
-   u_int RxMBytes = pCS->RxMBytes;
 
+   u_int TxBytes = TxBytesAllConf;
+   u_int TxMBytes = TxMBytesAllConf;
+   u_int RxBytes = RxBytesAllConf;
+   u_int RxMBytes = RxMBytesAllConf;
 
    CalcBW(pCS,FALSE);
    CmdUpTime(p,pCC1,Arg);

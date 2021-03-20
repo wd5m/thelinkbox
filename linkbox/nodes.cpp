@@ -18,6 +18,9 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.29  2021/03/20 16:29:15  wd5m
+   1. Corrected int bLogCmd to be extern in src/conference.h, as it is shared now.
+
    Revision 1.29  2021/03/04 16:29:15  wd5m
    1. Added call to GetTxAudio in ~Node() function to clear hanging
       audio buffers when node disconnects. This frees audio buffers
@@ -348,8 +351,6 @@ typedef struct {
 struct avl_table *NodeTree;   // sorted by node name
 int bTTS_Running = FALSE;
 int MixBuffer[AUDIO_BUF_SIZE];
-
-int bLogCmd;
 
 // scratch buffers for audio transmission
 int16 AudioBuf[AUDIO_BUF_SIZE];  

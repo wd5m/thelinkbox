@@ -18,6 +18,9 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.37  2021/03/20 16:29:15  wd5m
+   1. Corrected int bLogCmd to be extern in src/conference.h, as it is shared now.
+
    $Log: conference.h,v $
    Revision 1.36  2012/12/09 18:50:43  wb6ymh
    Removed old chan_rptdir style Asterisk support.
@@ -367,6 +370,8 @@ typedef struct {
    int   bTooSlowLogged:1;
    int   bDeleteOnClose:1;
 } ClientFileIO;
+
+extern int bLogCmd;
 
 extern int ConferenceClients;
 

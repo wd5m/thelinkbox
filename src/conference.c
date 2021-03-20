@@ -18,6 +18,9 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.74  2021/03/20 16:29:15  wd5m
+   1. Corrected int bLogCmd to be extern in src/conference.h, as it is shared now.
+
    $Log: conference.c,v $
    Revision 1.73  2021/03/15 18:49:48  wd5m
    1. Updated RTP_Data function to cause non EchoLink nodes to
@@ -899,7 +902,7 @@ ConfClient ChatCC;
 ClientInfo *ChatClient = NULL;
 int bCmdLineChatMode;
 char *CmdArg;
-int bLogCmd;
+int bLogCmd = TRUE;
 
 struct avl_table *Conferences;   // sorted by Port number
 

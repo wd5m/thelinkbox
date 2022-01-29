@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.c,v $
+   Revision 1.38  2022/01/28 19:32:13  wd5m
+   1. Add RewindAfterPause.
+
    Revision 1.37  2012/12/09 19:32:13  wb6ymh
    1. Removed old chan_rptdir style Asterisk support variables AsteriskIP,
    AsteriskBind2IP, AsteriskDesc, AsteriskPort, and AsteriskEnable.
@@ -285,6 +288,7 @@ int MaxPlayBackPause    = 5;
 int MinPlayBackPause    = 0;
 int AudioTestConf       = 0;
 int MaxPlayWithoutPause = (10 * 60);   // 10 minutes
+int RewindAfterPause    = 0;
 int SaveInfoFiles       = 0;
 int ShowStationInfo     = 0;
 int WriteHostFile       = 0;
@@ -386,6 +390,7 @@ struct config_entry ConfigVars[] = {
    { "MinPlayBackPause", "%d", &MinPlayBackPause, 0},
    { "AudioTestConf", "%d", &AudioTestConf, 0},
    { "MaxPlayWithoutPause", "%d", &MaxPlayWithoutPause, 0},
+   { "RewindAfterPause", "%d", &RewindAfterPause, 0},
    { "SaveInfoFiles", "%d", &SaveInfoFiles, 0},
    { "ShowStationInfo", "%d", &ShowStationInfo, 0},
    { "WriteHostFile", "%d", &WriteHostFile, 0},

@@ -961,8 +961,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
 
    if(MaxPlayWithoutPause != 0) {
       if(RewindAfterPause > 0 && 
-	 bRew &&
-	 MaxPlayWithoutPause > RewindAfterPause) {
+         MaxPlayWithoutPause > RewindAfterPause) {
          if(b8BitFile) {
             RewSamples = -(RewindAfterPause * 8000);
          }else{
@@ -977,7 +976,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
       // Pausing playback
          if(TimeNow.tv_sec - Timer > MinPlayBackPause) {
          // rewind?
-            if(RewSamples != 0) {
+            if(RewSamples != 0 && bRew) {
                if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
                   LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
                }
@@ -1019,13 +1018,13 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
 
       if(SamplesRead < Samples &&
          SamplesRead > 0 &&
-	 MaxPlayWithoutPause != 0 &&
-	 MinPlayBackPause != 0) 
+		 MaxPlayWithoutPause != 0 &&
+		 MinPlayBackPause != 0) 
       {
       // Pause TX between files
          bFilePlaybackPause = TRUE;
          Timer = TimeNow.tv_sec;
-	 bRew = FALSE;
+         bRew = FALSE;
       }else if(SamplesRead < Samples){
          if(!feof(fp)) {
             char *cp;
@@ -1043,7 +1042,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          fclose(fp);
          fp = NULL;
          bFromFile = FALSE;
-	 bRew = TRUE;
+         bRew = TRUE;
       }
    }
 

@@ -489,6 +489,11 @@ LogFileRolloverType = 1
 ; seconds.
 ;MaxPlayWithoutPause = 600
 
+; The RewindAfterPause variable sets the number of seconds to rewind a 
+; playback file after pausing for MinPlayBackPause after MaxPlayWithoutPause.
+; This only affects playback using ".tonegen file filename" commands.
+; RewindAfterPause = 5
+
 ; This variable specifies a welcome file to be played to users when they
 ; connect to thelinkbox.  The file may be in one of two formats:
 ;   tlb's (and tbd's) internal format

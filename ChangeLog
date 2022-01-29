@@ -1,3 +1,17 @@
+
+#####################################
+Changes in version 0.57 1/28/2022  wd5m
+
+Enhancements:
+1. Add RewindAfterPause configuration setting for ToneGen audio file 
+playback. Value is in seconds. Will cause audio to rewind for seconds
+specified after pausing for MaxPlayWithoutPause. Default value is zero.
+Must be less than MaxPlayWithoutPause value. Allows a few words to be
+repeated upon resuming transmission after the pause. Only the .tonegen
+command will utilize this setting.
+2. Add MinPlayBackPause pauses between multiple audio files played with
+.tonegen.
+
 #####################################
 Changes in version 0.56.4 3/20/2021  wd5m
 

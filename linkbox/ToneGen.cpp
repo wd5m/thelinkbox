@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.cpp,v $
+   Revision 1.16  2022/01/28 19:24:11  wd5m
+   Added RewindAfterPause. Add MinPlayBackPause pause between files.
+
    Revision 1.15  2009/09/13 19:24:11  wb6ymh
    Added DefaultLevel argument to constructor.
 
@@ -163,6 +166,8 @@ CToneGen::CToneGen(int DefaultLevel,int Ax25Delay,int Ax25Level)
    Ax25ToneLevel = Ax25Level;
    bFilePlaybackPause = FALSE;
    Timer = 0;
+   RewindAfterPause = 0;
+   bRew = TRUE;
    MaxPlayWithoutPause = 0;
    MinPlayBackPause = 0;
    bWelcome = FALSE;
@@ -952,8 +957,18 @@ char *CToneGen::TestFile(char *Path,char **pErrPos)
 int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
 {
    int SamplesRead = 0;
+   int RewSamples = 0;
 
    if(MaxPlayWithoutPause != 0) {
+      if(RewindAfterPause > 0 && 
+	 bRew &&
+	 MaxPlayWithoutPause > RewindAfterPause) {
+         if(b8BitFile) {
+            RewSamples = -(RewindAfterPause * 8000);
+         }else{
+            RewSamples = -(2 * RewindAfterPause * 8000);
+         }
+      }
       if(Timer == 0) {
       // First output, start the timer
          Timer = TimeNow.tv_sec;
@@ -961,6 +976,12 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
       else if(bFilePlaybackPause) {
       // Pausing playback
          if(TimeNow.tv_sec - Timer > MinPlayBackPause) {
+         // rewind?
+            if(RewSamples != 0) {
+               if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
+                  LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
+               }
+            }
          // Resume playback
             bFilePlaybackPause = FALSE;
             Timer = TimeNow.tv_sec;
@@ -996,7 +1017,16 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          SamplesRead = fread(ToneBuf,sizeof(int16),Samples,fp);
       }
 
-      if(SamplesRead < Samples) {
+      if(SamplesRead < Samples &&
+         SamplesRead > 0 &&
+	 MaxPlayWithoutPause != 0 &&
+	 MinPlayBackPause != 0) 
+      {
+      // Pause TX between files
+         bFilePlaybackPause = TRUE;
+         Timer = TimeNow.tv_sec;
+	 bRew = FALSE;
+      }else if(SamplesRead < Samples){
          if(!feof(fp)) {
             char *cp;
             char CharSave;
@@ -1013,6 +1043,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          fclose(fp);
          fp = NULL;
          bFromFile = FALSE;
+	 bRew = TRUE;
       }
    }
 

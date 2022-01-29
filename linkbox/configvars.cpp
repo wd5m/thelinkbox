@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.cpp,v $
+   Revision 1.41  2022/01/28 16:41:06  wd5m
+   Added RewindAfterPause.
+
    Revision 1.40  2013/05/13 16:41:06  beta2k
 
    Added patches from Kristoff - ON1ARF for sysfs GPIO access for PTT
@@ -430,6 +433,7 @@ int MaxPlayBackPause    = 5;
 int MinPlayBackPause    = 0;
 int AudioTestConf       = 0;
 int MaxPlayWithoutPause = (10 * 60);   // 10 minutes
+int RewindAfterPause    = 0;
 int SaveInfoFiles       = 0;
 int ShowStationInfo     = 0;
 int WriteHostFile       = 0;
@@ -594,6 +598,7 @@ struct config_entry ConfigVars[] = {
    { "MinPlayBackPause", "%d", &MinPlayBackPause, 0},
    { "AudioTestConf", "%d", &AudioTestConf, 0},
    { "MaxPlayWithoutPause", "%d", &MaxPlayWithoutPause, 0},
+   { "RewindAfterPause", "%d", &RewindAfterPause, 0},
    { "SaveInfoFiles", "%d", &SaveInfoFiles, 0},
    { "ShowStationInfo", "%d", &ShowStationInfo, 0},
    { "WriteHostFile", "%d", &WriteHostFile, 0},
@@ -800,6 +805,7 @@ struct config_entry VoipConfigVars[] = {
    { "DisableWelcome", "%d", VOIP_VAR(DisableWelcome,0)},
    { "MinPlayBackPause", "%d", VOIP_VAR(MinPlayBackPause, 0)},
    { "MaxPlayWithoutPause", "%d", VOIP_VAR(MaxPlayWithoutPause, 0)},
+   { "RewindAfterPause", "%d", VOIP_VAR(RewindAfterPause, 0)},
    { "WelcomeFile", "%s", VOIP_VAR(WelcomeFile, 0)},
    { "ConnectScript", "%s", VOIP_VAR(ConnectScript, 0)},
    { "DisconnectAfterWelcome", "%d", VOIP_VAR(bDisconnectAfterWelcome, 0)},

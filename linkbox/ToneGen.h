@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.h,v $
+   Revision 1.9  2022/01/28 19:24:39  wd5m
+   Added RewindAfterPause.
+
    Revision 1.8  2009/09/13 19:24:39  wb6ymh
    Added DefaultLevel argument to constructor.
 
@@ -63,6 +66,8 @@ public:
    int ID;
    int bIDSource;
    int bWelcome;
+   int RewindAfterPause;
+   int bRew;
    int MaxPlayWithoutPause;
    int MinPlayBackPause;
 

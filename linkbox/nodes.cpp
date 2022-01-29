@@ -18,6 +18,9 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.30  2022/01/28 16:29:15  wd5m
+   1. Added RewindAfterPause.
+
    Revision 1.29  2021/03/20 16:29:15  wd5m
    1. Corrected int bLogCmd to be extern in src/conference.h, as it is shared now.
 
@@ -1479,6 +1482,7 @@ Node::Node()
    Energy = 0.0;
    ToneBurstToneID = 0;
    bToneBurstAccessed = 0;
+   RewindAfterPause = -1;
    MaxPlayWithoutPause = -1;
    MinPlayBackPause = -1;
    ReducedGain = 25; // default to 6db drop
@@ -2878,6 +2882,13 @@ void Node::CmdToneGen(ClientBufPrint *p,char *Arg)
          LOG_ERROR(("%s#%d: new failed\n",__FUNCTION__,__LINE__));
          p->print("Error: new failed\r");
          break;
+      }
+
+      if(RewindAfterPause == -1) {
+         pGenerator->RewindAfterPause = ::RewindAfterPause;
+      }
+      else {
+         pGenerator->RewindAfterPause = RewindAfterPause;
       }
 
       if(MaxPlayWithoutPause == -1) {

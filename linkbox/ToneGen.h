@@ -19,6 +19,11 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.h,v $
+   Revision 1.10  2022/01/31 19:24:11  wd5m
+   Added Silent and TimeLapse functions and other changes to detect
+   silent periods in audio files played by .tonegen command to
+   pause transmission during silence.
+
    Revision 1.9  2022/01/28 19:24:39  wd5m
    Added RewindAfterPause.
 
@@ -67,9 +72,10 @@ public:
    int bIDSource;
    int bWelcome;
    int RewindAfterPause;
-   int bRew;
    int MaxPlayWithoutPause;
    int MinPlayBackPause;
+   int SilentThresholdTime;	// msecs of silence to trigger
+   int SilentThreshold;		// max audil level to detect silence
 
 private:
    int GenSamples(int16 *ToneBuf,int Samples);
@@ -118,6 +124,15 @@ private:
    FILE *fp;
    FILE *DebugFp;
    time_t Timer;
+   int bSilentNow;      // true when currently detecting silence
+   int bSilentBefore;   // true after detecting silence now
+   int SilentAveLevel;  // average level of audio from file
+   int SilentAveTemp;   // temp holder for += abs(ToneBuf[i])
+   int SilentSamples;   // holds # of samples for silent detect
+   struct timeval LastSilentTrip;   // last time when silence deteced
+   void Silent(int16 *ToneBuf,int Samples);
+   int TimeLapse(struct timeval *p);
+   int bRew;
 
    int bGenDtmf:1;
    int bGenCW:1;

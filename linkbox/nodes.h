@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: nodes.h,v $
+   Revision 1.17  2022/01/31 16:29:51  wd5m
+   Add SilentThresholdTime and SilentThreshold.
+
    Revision 1.16  2022/01/28 16:29:51  wd5m
    Added RewindAfterPause.
 
@@ -282,6 +285,8 @@ public:
    int MinPlayBackPause;
    int MaxPlayWithoutPause;
    int RewindAfterPause;
+   int SilentThresholdTime;
+   int SilentThreshold;
    int ReducedGain;
    int AnnouncementPriority;
    int AudioPriority;

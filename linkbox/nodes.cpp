@@ -18,6 +18,9 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.31  2022/01/28 16:29:15  wd5m
+   1. Add SilentThresholdTime and SilentThreshold.
+
    Revision 1.30  2022/01/28 16:29:15  wd5m
    1. Added RewindAfterPause.
 
@@ -1485,6 +1488,8 @@ Node::Node()
    RewindAfterPause = -1;
    MaxPlayWithoutPause = -1;
    MinPlayBackPause = -1;
+   SilentThreshold = -1;
+   SilentThresholdTime = -1;
    ReducedGain = 25; // default to 6db drop
    AnnouncementPriority = AudioPriority = HIGH_AUDIO_PRI;
    LastActivity = 0;
@@ -2882,6 +2887,20 @@ void Node::CmdToneGen(ClientBufPrint *p,char *Arg)
          LOG_ERROR(("%s#%d: new failed\n",__FUNCTION__,__LINE__));
          p->print("Error: new failed\r");
          break;
+      }
+
+      if(SilentThreshold == -1) {
+         pGenerator->SilentThreshold = ::SilentThreshold;
+      }
+      else {
+         pGenerator->SilentThreshold = SilentThreshold;
+      }
+
+      if(SilentThresholdTime == -1) {
+         pGenerator->SilentThresholdTime = ::SilentThresholdTime;
+      }
+      else {
+         pGenerator->SilentThresholdTime = SilentThresholdTime;
       }
 
       if(RewindAfterPause == -1) {

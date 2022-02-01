@@ -1,5 +1,17 @@
 
 #####################################
+Changes in version 0.57 1/31/2022  wd5m
+
+Enhancements:
+1. Add pause on silence feature to .tonegen FILE commands. New 
+configuration variables SilentThreshold and SilentThresholdTime allow
+detecting silence in an audil file and pausing to remove silence
+and stop transmitting up to minPlayBackPause seconds. See 
+tbd.conf.sample for addtional setting details. When running tlb
+with debug enabled, e.g. tlb -d, and SilentThresholdTime enabled
+information on silence deteced can be displayed.
+
+#####################################
 Changes in version 0.57 1/28/2022  wd5m
 
 Enhancements:

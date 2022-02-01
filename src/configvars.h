@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.h,v $
+   Revision 1.39  2022/01/31 16:27:41  wd5m
+   1. Add SilentThresholdTime and SilentThreshold.
+
    Revision 1.37  2022/01/28 16:27:41  wd5m
    1. Add RewindAfterPause.
 
@@ -248,6 +251,8 @@ extern int MinPlayBackPause;
 extern int AudioTestConf;
 extern int MaxPlayWithoutPause;
 extern int RewindAfterPause;
+extern int SilentThresholdTime;
+extern int SilentThreshold;
 extern int SaveInfoFiles;
 extern int ShowStationInfo;
 extern int WriteHostFile;

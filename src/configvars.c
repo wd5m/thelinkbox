@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.c,v $
+   Revision 1.39  2022/01/31 19:32:13  wd5m
+   1. Add SilentThresholdTime and SilentThreshold.
+
    Revision 1.38  2022/01/28 19:32:13  wd5m
    1. Add RewindAfterPause.
 
@@ -289,6 +292,8 @@ int MinPlayBackPause    = 0;
 int AudioTestConf       = 0;
 int MaxPlayWithoutPause = (10 * 60);   // 10 minutes
 int RewindAfterPause    = 0;
+int SilentThresholdTime = 0;
+int SilentThreshold     = 0;
 int SaveInfoFiles       = 0;
 int ShowStationInfo     = 0;
 int WriteHostFile       = 0;
@@ -391,6 +396,8 @@ struct config_entry ConfigVars[] = {
    { "AudioTestConf", "%d", &AudioTestConf, 0},
    { "MaxPlayWithoutPause", "%d", &MaxPlayWithoutPause, 0},
    { "RewindAfterPause", "%d", &RewindAfterPause, 0},
+   { "SilentThresholdTime", "%d", &SilentThresholdTime, 0},
+   { "SilentThreshold", "%d", &SilentThreshold, 0},
    { "SaveInfoFiles", "%d", &SaveInfoFiles, 0},
    { "ShowStationInfo", "%d", &ShowStationInfo, 0},
    { "WriteHostFile", "%d", &WriteHostFile, 0},

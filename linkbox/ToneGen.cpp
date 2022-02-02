@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.cpp,v $
+   Revision 1.18  2022/02/02 19:24:11  wd5m
+   Fix: Re-enable Rewind after silent pause.
+
    Revision 1.17  2022/01/31 19:24:11  wd5m
    Added Silent and TimeLapse functions and other changes to detect
    silent periods in audio files played by .tonegen command to
@@ -1022,6 +1025,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
       if(Timer == 0) {
       // First output, start the timer
          Timer = TimeNow.tv_sec;
+         bRew = TRUE;
       }
       else if(bFilePlaybackPause) {
       // Pausing playback
@@ -1034,6 +1038,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
             }
          // Resume playback
             bFilePlaybackPause = FALSE;
+            bRew = TRUE;
             Timer = TimeNow.tv_sec;
          }
       }
@@ -1088,9 +1093,9 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          else if(bSilentBefore) {
             bSilentBefore = FALSE;
             if(TimeNow.tv_sec - Timer < MinPlayBackPause) {
-               bFilePlaybackPause = TRUE;
+	       bFilePlaybackPause = TRUE;
 	       SamplesRead = -1;
-               bRew = FALSE;
+	       bRew = FALSE;
                if(b8BitFile) {
                   RewSamples = -(SilentThresholdTime * 8);
                }else{
@@ -1099,7 +1104,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
                if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
                   LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
                }
-            }
+	    }
 	 }
       }
 

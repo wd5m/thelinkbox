@@ -18,6 +18,11 @@
    The latest version of this program may be found at
    http://CQiNet.sourceforge.net
 
+   Revision 1.75  2022/02/09 16:29:15  wd5m
+   1. Allow "-" or "!" value for RTP_Pass configuration variable for
+   SpeakFreely/RTP connections to be unauthenticated. The "!" value
+   allows unauthenticated EchoLink connections too.
+
    Revision 1.74  2021/03/20 16:29:15  wd5m
    1. Corrected int bLogCmd to be extern in src/conference.h, as it is shared now.
 
@@ -7793,7 +7798,7 @@ int CheckPassword(ConfClient *pCC,ACL_User *pACL)
    }
    else if(RTP_Pass != NULL) {
    // Conference password set
-      if(strcmp(RTP_Pass,"-") == 0) {
+      if(strcmp(RTP_Pass,"-") == 0 || strcmp(RTP_Pass,"!") == 0) {
       // You asked for it, you got it ... no security for RTP / Speak Freely
          Ret = TRUE;
       }

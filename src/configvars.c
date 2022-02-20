@@ -762,21 +762,6 @@ int DoConfigPass(int Pass)
    }
 
    if(Pass == 1 && Ret == 0) do {
-   // Require that the callsign be a link, repeater or conference callsign
-      if(ConferenceCall != NULL && 
-         ConferenceCall[0] != '*' && 
-         strstr(ConferenceCall,"-R") == NULL &&
-         strstr(ConferenceCall,"-L") == NULL)
-      {  // Must be a bare callsign ... not allowed.
-         LOG_ERROR(("Error: Invalid ConferenceCall \"%s\".\n"
-                    "ConferenceCall must be a callsign folllowed by \"-R\", "
-                    "or \"-L\" or \n"
-                    "be an assigned conference name.\n",
-                    ConferenceCall));
-         Ret = ERR_CONFIG_FILE;
-         break;
-      }
-
       if(AvrsEnable && !AVRS_Validate()) {
          Ret = ERR_CONFIG_FILE;
          break;

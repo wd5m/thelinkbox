@@ -907,7 +907,7 @@ ConfClient ChatCC;
 ClientInfo *ChatClient = NULL;
 int bCmdLineChatMode;
 char *CmdArg;
-int bLogCmd = TRUE;
+int bLogCmd;
 
 struct avl_table *Conferences;   // sorted by Port number
 

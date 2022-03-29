@@ -1112,7 +1112,7 @@ int VoipNode::GetRxAudio(
          }
       }
    }
-   else {
+   else if (ActiveSources > 0){
       bRxActive = TRUE;
    }
 

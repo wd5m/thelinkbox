@@ -19,6 +19,17 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.cpp,v $
+   Revision 1.18  2022/02/02 19:24:11  wd5m
+   Fix: Re-enable Rewind after silent pause.
+
+   Revision 1.17  2022/01/31 19:24:11  wd5m
+   Added Silent and TimeLapse functions and other changes to detect
+   silent periods in audio files played by .tonegen command to
+   pause transmission during silence.
+
+   Revision 1.16  2022/01/28 19:24:11  wd5m
+   Added RewindAfterPause. Add MinPlayBackPause pause between files.
+
    Revision 1.15  2009/09/13 19:24:11  wb6ymh
    Added DefaultLevel argument to constructor.
 
@@ -163,10 +174,19 @@ CToneGen::CToneGen(int DefaultLevel,int Ax25Delay,int Ax25Level)
    Ax25ToneLevel = Ax25Level;
    bFilePlaybackPause = FALSE;
    Timer = 0;
+   RewindAfterPause = 0;
+   bRew = TRUE;
    MaxPlayWithoutPause = 0;
    MinPlayBackPause = 0;
    bWelcome = FALSE;
    ID = 0;
+   bSilentNow = FALSE;
+   bSilentBefore = FALSE;
+   SilentAveLevel = 0;
+   SilentAveTemp = 0;
+   SilentSamples = 0;
+   SilentThreshold = 0;
+   SilentThresholdTime = 0;
 }
 
 CToneGen::~CToneGen()
@@ -948,21 +968,77 @@ char *CToneGen::TestFile(char *Path,char **pErrPos)
    return Ret;
 }
 
+// Return number of milliseconds of time since p
+int CToneGen::TimeLapse(struct timeval *p)
+{
+   int DeltaSeconds = TimeNow.tv_sec - p->tv_sec;
+
+   if(DeltaSeconds > (0x7fffffff / 1000)) {
+   // TimeLapse is too big to express in milliseconds, just return
+   // the max we can.
+      return 0x7fffffff;
+   }
+   return (DeltaSeconds * 1000) +
+          ((TimeNow.tv_usec - p->tv_usec) / 1000);
+}
+
+void CToneGen::Silent(int16 *ToneBuf,int Samples)
+{
+// look for silence from ToneBuf audio packet samples
+   for(int i = 0; i < Samples; i++) {
+      SilentAveTemp += abs(ToneBuf[i]);
+   }
+   SilentSamples += Samples;
+   if(SilentSamples >= 800) {
+   // average of 100 milliseconds or more
+      SilentAveLevel = SilentAveTemp / SilentSamples;
+      SilentSamples = SilentAveTemp = 0;
+      if(SilentAveLevel <= SilentThreshold && !bSilentNow) {
+         LastSilentTrip = TimeNow;
+         bSilentNow = TRUE;
+         D2PRINTF(("S"));
+         //if(Debug) {
+            //LOG_ERROR(("%s: SilentAveLevel: %d/%d\n",__FUNCTION__,SilentAveLevel,
+                       //SilentThreshold));
+         //}
+      }else if (SilentAveLevel > SilentThreshold) {
+         bSilentNow = FALSE;
+      }
+   }
+}
 
 int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
 {
    int SamplesRead = 0;
+   int RewSamples = 0;
 
    if(MaxPlayWithoutPause != 0) {
+      if(RewindAfterPause > 0 && 
+	 bRew &&
+	 MaxPlayWithoutPause > RewindAfterPause) {
+         if(b8BitFile) {
+            RewSamples = -(RewindAfterPause * 8000);
+         }else{
+            RewSamples = -(2 * RewindAfterPause * 8000);
+         }
+      }
       if(Timer == 0) {
       // First output, start the timer
          Timer = TimeNow.tv_sec;
+         bRew = TRUE;
       }
       else if(bFilePlaybackPause) {
       // Pausing playback
          if(TimeNow.tv_sec - Timer > MinPlayBackPause) {
+         // rewind?
+            if(RewSamples != 0) {
+               if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
+                  LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
+               }
+            }
          // Resume playback
             bFilePlaybackPause = FALSE;
+            bRew = TRUE;
             Timer = TimeNow.tv_sec;
          }
       }
@@ -996,7 +1072,52 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          SamplesRead = fread(ToneBuf,sizeof(int16),Samples,fp);
       }
 
-      if(SamplesRead < Samples) {
+      if(SilentThresholdTime > 0) {
+         Silent(ToneBuf, SamplesRead);
+         int LastTrip = TimeLapse(&LastSilentTrip);
+         if(Debug && bSilentNow) {
+            LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago, SilentThresholdTime %d ms\n",
+               __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip,SilentThresholdTime));
+         }
+         if(bSilentNow && LastTrip >= SilentThresholdTime) {
+            if(!bSilentBefore) {
+               Timer = TimeNow.tv_sec;
+               bSilentBefore = TRUE;
+	    }
+	    SamplesRead = -1;
+            if(Debug) {
+               LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago\n",
+                  __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip));
+            }
+         }
+         else if(bSilentBefore) {
+            bSilentBefore = FALSE;
+            if(TimeNow.tv_sec - Timer < MinPlayBackPause) {
+	       bFilePlaybackPause = TRUE;
+	       SamplesRead = -1;
+	       bRew = FALSE;
+               if(b8BitFile) {
+                  RewSamples = -(SilentThresholdTime * 8);
+               }else{
+                  RewSamples = -(2 * SilentThresholdTime * 8);
+               }
+               if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
+                  LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
+               }
+	    }
+	 }
+      }
+
+      if(SamplesRead < Samples &&
+         SamplesRead > 0 &&
+	 MaxPlayWithoutPause != 0 &&
+	 MinPlayBackPause != 0) 
+      {
+      // Pause TX between files
+         bFilePlaybackPause = TRUE;
+         Timer = TimeNow.tv_sec;
+	 bRew = FALSE;
+      }else if(SamplesRead < Samples && SamplesRead != -1){
          if(!feof(fp)) {
             char *cp;
             char CharSave;
@@ -1013,6 +1134,7 @@ int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
          fclose(fp);
          fp = NULL;
          bFromFile = FALSE;
+	 bRew = TRUE;
       }
    }
 

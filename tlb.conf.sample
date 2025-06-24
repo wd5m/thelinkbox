@@ -489,6 +489,21 @@ LogFileRolloverType = 1
 ; seconds.
 ;MaxPlayWithoutPause = 600
 
+; The RewindAfterPause variable sets the number of seconds to rewind a 
+; playback file after pausing for MinPlayBackPause after MaxPlayWithoutPause.
+; This only affects playback using ".tonegen file filename" commands.
+; RewindAfterPause = 5
+
+; The SilentThresholdTime and SilentThresholdLevel variables manage pauses
+; during silence in audio file transmission using the .tonegen command.
+; SilentThresholdTime is the number of milliseconds of continous silence
+; required to trigger a pause in transmission. SilentThrehold is the
+; maximimum level of audio required to trigger silence detection. The
+; level may be any value from 0 to 32768. If SilentThresholdTime is set to
+; zero, the default, this feature is disabled.
+; SilentThreshold = 0
+; SilentThresholdTime = 0
+
 ; This variable specifies a welcome file to be played to users when they
 ; connect to thelinkbox.  The file may be in one of two formats:
 ;   tlb's (and tbd's) internal format

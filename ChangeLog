@@ -1,3 +1,41 @@
+
+#####################################
+Changes in version 0.57 3/28/2022  wd5m
+
+Enhancements:
+1. Add COS event to fire when nodes begin or stop transmitting (talking).
+Event: COS <callsign> [ <active> | <inactive> ]
+
+Fixes:
+Require ActiveSources > 0 to set "bRxActive = TRUE" in getRxAudio. This 
+resolves an issue where COS would revert to active state when a few 
+audio sample packets remain after a station stops transmitting.
+
+#####################################
+Changes in version 0.57 1/31/2022  wd5m
+
+Enhancements:
+1. Add pause on silence feature to .tonegen FILE commands. New 
+configuration variables SilentThreshold and SilentThresholdTime allow
+detecting silence in an audio file and pausing to remove silence
+and stop transmitting up to minPlayBackPause seconds. See 
+tbd.conf.sample for addtional setting details. When running tlb
+with debug enabled, e.g. tlb -d, and SilentThresholdTime enabled
+information on silence deteced can be displayed.
+
+#####################################
+Changes in version 0.57 1/28/2022  wd5m
+
+Enhancements:
+1. Add RewindAfterPause configuration setting for ToneGen audio file 
+playback. Value is in seconds. Will cause audio to rewind for seconds
+specified after pausing for MaxPlayWithoutPause. Default value is zero.
+Must be less than MaxPlayWithoutPause value. Allows a few words to be
+repeated upon resuming transmission after the pause. Only the .tonegen
+command will utilize this setting.
+2. Add MinPlayBackPause pauses between multiple audio files played with
+.tonegen.
+
 #####################################
 Changes in version 0.56.4 3/20/2021  wd5m
 

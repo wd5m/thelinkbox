@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: voip.cpp,v $
+   Revision 1.26 2022/03/28 00:40:02 WD5M
+   1. Add EventHook for "COS <callsign> <active | inactive>"
+   
    Revision 1.25  2021/03/05 14:05:02 -0500 wd5m
    1. Changed VoipNode::DeleteTx to remove if(pAudio->BufNum > pDeleteLink->BufNum)
    logic so all audio buffers are consumed. This is part of a memory leak fix.
@@ -1109,12 +1112,13 @@ int VoipNode::GetRxAudio(
          }
       }
    }
-   else {
+   else if (ActiveSources > 0){
       bRxActive = TRUE;
    }
 
    if(bWasActive != bRxActive) {
       DPRINTF(("Port %s: COS %sactive\n",NodeName,bRxActive ? "" : "in"));
+      EventHook("COS %s %sactive",NodeName,bRxActive ? "" : "in");
    }
 
 // return number of samples available

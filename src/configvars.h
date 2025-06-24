@@ -19,6 +19,12 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.h,v $
+   Revision 1.39  2022/01/31 16:27:41  wd5m
+   1. Add SilentThresholdTime and SilentThreshold.
+
+   Revision 1.37  2022/01/28 16:27:41  wd5m
+   1. Add RewindAfterPause.
+
    Revision 1.36  2012/12/09 16:27:41  wb6ymh
    1. Removed old chan_rptdir style Asterisk support variables AsteriskIP,
    AsteriskBind2IP, AsteriskDesc, AsteriskPort, and AsteriskEnable.
@@ -244,6 +250,9 @@ extern int MaxPlayBackPause;
 extern int MinPlayBackPause;
 extern int AudioTestConf;
 extern int MaxPlayWithoutPause;
+extern int RewindAfterPause;
+extern int SilentThresholdTime;
+extern int SilentThreshold;
 extern int SaveInfoFiles;
 extern int ShowStationInfo;
 extern int WriteHostFile;

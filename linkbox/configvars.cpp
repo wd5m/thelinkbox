@@ -19,6 +19,12 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.cpp,v $
+   Revision 1.42  2022/01/31 16:41:06  wd5m
+   Add SilentThresholdTime and SilentThreshold.
+
+   Revision 1.41  2022/01/29 16:41:06  wd5m
+   Added RewindAfterPause. Correct case on Twist, ReverseTwist.
+
    Revision 1.40  2013/05/13 16:41:06  beta2k
 
    Added patches from Kristoff - ON1ARF for sysfs GPIO access for PTT
@@ -430,6 +436,9 @@ int MaxPlayBackPause    = 5;
 int MinPlayBackPause    = 0;
 int AudioTestConf       = 0;
 int MaxPlayWithoutPause = (10 * 60);   // 10 minutes
+int RewindAfterPause    = 0;
+int SilentThresholdTime = 0;
+int SilentThreshold     = 0;
 int SaveInfoFiles       = 0;
 int ShowStationInfo     = 0;
 int WriteHostFile       = 0;
@@ -594,6 +603,9 @@ struct config_entry ConfigVars[] = {
    { "MinPlayBackPause", "%d", &MinPlayBackPause, 0},
    { "AudioTestConf", "%d", &AudioTestConf, 0},
    { "MaxPlayWithoutPause", "%d", &MaxPlayWithoutPause, 0},
+   { "RewindAfterPause", "%d", &RewindAfterPause, 0},
+   { "SilentThreshold", "%d", &SilentThreshold, 0},
+   { "SilentThresholdTime", "%d", &SilentThresholdTime, 0},
    { "SaveInfoFiles", "%d", &SaveInfoFiles, 0},
    { "ShowStationInfo", "%d", &ShowStationInfo, 0},
    { "WriteHostFile", "%d", &WriteHostFile, 0},
@@ -687,8 +699,8 @@ struct config_entry ConfigVars[] = {
    { "HalfDuplexRF", "%d", CLASS_VAR(HalfDuplexRF,0)},
    { "PCMRate", "%d", CLASS_VAR(PCMRate,0), 0},
    { "CTCSSLevel", "%d", CLASS_VAR(CTCSSLevel,0)},
-   { "twist", "%d", CLASS_VAR(Twist,0)},
-   { "reversetwist", "%d", CLASS_VAR(ReverseTwist,0)},
+   { "Twist", "%d", CLASS_VAR(Twist,0)},
+   { "ReverseTwist", "%d", CLASS_VAR(ReverseTwist,0)},
    { "CtcssDecoderSamples", "%d", CLASS_VAR(CtcssDecoderSamples,0)},
    { "MuteDTMF", "%d", CLASS_VAR(MuteDTMF,0)},
    { "DTMFCommandTimeout", "%d", CLASS_VAR(DTMFCommandTimeout,0)},
@@ -777,8 +789,8 @@ struct config_entry ConfigVars[] = {
 struct config_entry VoipConfigVars[] = {
 // Required parameters
    { "DtmfMethod", "%d", VOIP_VAR(DtmfMethod,0)},
-   { "twist", "%d", VOIP_VAR(Twist,0)},
-   { "reversetwist", "%d", VOIP_VAR(ReverseTwist,0)},
+   { "Twist", "%d", VOIP_VAR(Twist,0)},
+   { "ReverseTwist", "%d", VOIP_VAR(ReverseTwist,0)},
    { "MuteDTMF", "%d", VOIP_VAR(MuteDTMF,0)},
    { "DTMFCommandTimeout", "%d", VOIP_VAR(DTMFCommandTimeout,0)},
    { "Ctone", "%d", VOIP_VAR(Ctone,CON_FLG_PASS2),AccessCtone},
@@ -800,6 +812,9 @@ struct config_entry VoipConfigVars[] = {
    { "DisableWelcome", "%d", VOIP_VAR(DisableWelcome,0)},
    { "MinPlayBackPause", "%d", VOIP_VAR(MinPlayBackPause, 0)},
    { "MaxPlayWithoutPause", "%d", VOIP_VAR(MaxPlayWithoutPause, 0)},
+   { "RewindAfterPause", "%d", VOIP_VAR(RewindAfterPause, 0)},
+   { "SilentThresholdTime", "%d", VOIP_VAR(SilentThresholdTime, 0)},
+   { "SilentThreshold", "%d", VOIP_VAR(SilentThreshold, 0)},
    { "WelcomeFile", "%s", VOIP_VAR(WelcomeFile, 0)},
    { "ConnectScript", "%s", VOIP_VAR(ConnectScript, 0)},
    { "DisconnectAfterWelcome", "%d", VOIP_VAR(bDisconnectAfterWelcome, 0)},
@@ -1142,22 +1157,6 @@ int DoConfigPass(int Pass)
       Ret = read_config(fp,ConfigVars,Pass);
 
       if(Pass == 1 && Ret == 0) {
-      // Require that the callsign be a link, repeater or conference callsign
-         if(bEchoLinkEnabled && LoginInterval != 0 &&
-            ConferenceCall != NULL &&
-            ConferenceCall[0] != '*' &&
-            strstr(ConferenceCall,"-R") == NULL &&
-            strstr(ConferenceCall,"-L") == NULL)
-         {  // Must be a bare callsign ... not allowed.
-            LOG_ERROR(("Error: Invalid ConferenceCall \"%s\".\n"
-                       "ConferenceCall must be a callsign folllowed by \"-R\", "
-                       "or \"-L\" or \n"
-                       "be an assigned conference name.\n",
-                       ConferenceCall));
-            Ret = ERR_CONFIG_FILE;
-            break;
-         }
-
          if(AvrsEnable && !AVRS_Validate()) {
             Ret = ERR_CONFIG_FILE;
             break;

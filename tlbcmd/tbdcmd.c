@@ -19,6 +19,9 @@
    http://CQiNet.sourceforge.net
 
    $Log: tbdcmd.c,v $
+   Revision 1.20  2022/01/30 23:14:36  wd5m
+   Corrected spelling of Silent in usage text.
+   
    Revision 1.19  2009/09/13 23:14:36  wb6ymh
    Added support for .rxlevel command.
 
@@ -283,7 +286,7 @@ void Usage(char *Command)
    printf("\t-b - Bare, do not prepend port <TLBPORT>; to commands.\n");
    printf("\t-p - Specify port (default %d).\n",Port);
    printf("\t-q - Quiet, numeric result code only.\n");
-   printf("\t-s - Slient, suppress banner.\n");
+   printf("\t-s - Silent, suppress banner.\n");
    printf("\t-S - Allow conference bridge's station list (default is suppress).\n");
    printf("\t-t - Add timestamps to text chat messages.\n");
 }

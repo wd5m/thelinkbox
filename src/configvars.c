@@ -19,6 +19,12 @@
    http://CQiNet.sourceforge.net
 
    $Log: configvars.c,v $
+   Revision 1.39  2022/01/31 19:32:13  wd5m
+   1. Add SilentThresholdTime and SilentThreshold.
+
+   Revision 1.38  2022/01/28 19:32:13  wd5m
+   1. Add RewindAfterPause.
+
    Revision 1.37  2012/12/09 19:32:13  wb6ymh
    1. Removed old chan_rptdir style Asterisk support variables AsteriskIP,
    AsteriskBind2IP, AsteriskDesc, AsteriskPort, and AsteriskEnable.
@@ -285,6 +291,9 @@ int MaxPlayBackPause    = 5;
 int MinPlayBackPause    = 0;
 int AudioTestConf       = 0;
 int MaxPlayWithoutPause = (10 * 60);   // 10 minutes
+int RewindAfterPause    = 0;
+int SilentThresholdTime = 0;
+int SilentThreshold     = 0;
 int SaveInfoFiles       = 0;
 int ShowStationInfo     = 0;
 int WriteHostFile       = 0;
@@ -386,6 +395,9 @@ struct config_entry ConfigVars[] = {
    { "MinPlayBackPause", "%d", &MinPlayBackPause, 0},
    { "AudioTestConf", "%d", &AudioTestConf, 0},
    { "MaxPlayWithoutPause", "%d", &MaxPlayWithoutPause, 0},
+   { "RewindAfterPause", "%d", &RewindAfterPause, 0},
+   { "SilentThresholdTime", "%d", &SilentThresholdTime, 0},
+   { "SilentThreshold", "%d", &SilentThreshold, 0},
    { "SaveInfoFiles", "%d", &SaveInfoFiles, 0},
    { "ShowStationInfo", "%d", &ShowStationInfo, 0},
    { "WriteHostFile", "%d", &WriteHostFile, 0},
@@ -750,21 +762,6 @@ int DoConfigPass(int Pass)
    }
 
    if(Pass == 1 && Ret == 0) do {
-   // Require that the callsign be a link, repeater or conference callsign
-      if(ConferenceCall != NULL && 
-         ConferenceCall[0] != '*' && 
-         strstr(ConferenceCall,"-R") == NULL &&
-         strstr(ConferenceCall,"-L") == NULL)
-      {  // Must be a bare callsign ... not allowed.
-         LOG_ERROR(("Error: Invalid ConferenceCall \"%s\".\n"
-                    "ConferenceCall must be a callsign folllowed by \"-R\", "
-                    "or \"-L\" or \n"
-                    "be an assigned conference name.\n",
-                    ConferenceCall));
-         Ret = ERR_CONFIG_FILE;
-         break;
-      }
-
       if(AvrsEnable && !AVRS_Validate()) {
          Ret = ERR_CONFIG_FILE;
          break;

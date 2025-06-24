@@ -99,7 +99,7 @@ Usage: tbdcmd [-p<port>] [-q] [-s] [-S] [-t] [commands]
         -p - Specify cmdline port (default 5198).
         -q - Quiet, numeric result code only.
         -S - Allow conference bridge's station list (default is suppress).
-        -s - Slient, suppress banner.
+        -s - Silent, suppress banner.
         -t - Add timestamps to text chat messages.
 
 tbdchat

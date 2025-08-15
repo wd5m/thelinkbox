@@ -19,6 +19,11 @@
    http://CQiNet.sourceforge.net
 
    $Log: ToneGen.cpp,v $
+   Revision 1.19  2025/08/15 00:00:00  wd5m
+   Fix: GenFileSamples logic flow to close completed audio file to fire
+   script when SilentThreshold is enabled.
+
+   $Log: ToneGen.cpp,v $
    Revision 1.18  2022/02/02 19:24:11  wd5m
    Fix: Re-enable Rewind after silent pause.
 
@@ -1007,138 +1012,122 @@ void CToneGen::Silent(int16 *ToneBuf,int Samples)
    }
 }
 
-int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples)
-{
-   int SamplesRead = 0;
-   int RewSamples = 0;
+int CToneGen::GenFileSamples(int16 *ToneBuf,int Samples) {
+    int SamplesRead = 0;
+    int RewSamples = 0;
 
-   if(MaxPlayWithoutPause != 0) {
-      if(RewindAfterPause > 0 && 
-	 bRew &&
-	 MaxPlayWithoutPause > RewindAfterPause) {
-         if(b8BitFile) {
-            RewSamples = -(RewindAfterPause * 8000);
-         }else{
-            RewSamples = -(2 * RewindAfterPause * 8000);
-         }
-      }
-      if(Timer == 0) {
-      // First output, start the timer
-         Timer = TimeNow.tv_sec;
-         bRew = TRUE;
-      }
-      else if(bFilePlaybackPause) {
-      // Pausing playback
-         if(TimeNow.tv_sec - Timer > MinPlayBackPause) {
-         // rewind?
-            if(RewSamples != 0) {
-               if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
-                  LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
-               }
+    if(MaxPlayWithoutPause != 0) {
+        if(RewindAfterPause > 0 && bRew && MaxPlayWithoutPause > RewindAfterPause) {
+            if(b8BitFile) {
+                RewSamples = -(RewindAfterPause * 8000);
+            }else{
+                RewSamples = -(2 * RewindAfterPause * 8000);
             }
-         // Resume playback
-            bFilePlaybackPause = FALSE;
-            bRew = TRUE;
+        }
+        if(Timer == 0) {
+            // First output, start the timer
             Timer = TimeNow.tv_sec;
-         }
-      }
-      else if(TimeNow.tv_sec - Timer > MaxPlayWithoutPause) {
-      // ... and now for a brief message from our sponsor ...
-         bFilePlaybackPause = TRUE;
-         Timer = TimeNow.tv_sec;
-      }
-   }
-
-   if(bFilePlaybackPause) {
-      SamplesRead = -1;
-   }
-   else {
-      if(b8BitFile) {
-         char *TempBuf = (char *) malloc(Samples);
-         if(TempBuf != NULL) {
-            SamplesRead = fread(TempBuf,1,Samples,fp);
-            if(SamplesRead > 0) {
-               for(int i = 0; i < SamplesRead; i++) {
-                  ToneBuf[i] = (TempBuf[i] - 0x80) << 8;
-               }
+            bRew = TRUE;
+        }else if(bFilePlaybackPause) {
+            // Pausing playback
+            if(TimeNow.tv_sec - Timer > MinPlayBackPause) {
+                // rewind?
+                if(RewSamples != 0) {
+                    if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
+                        LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
+                    }
+                }
+                // Resume playback
+                bFilePlaybackPause = FALSE;
+                bRew = TRUE;
+                Timer = TimeNow.tv_sec;
             }
-            free(TempBuf);
-         }
-         else {
-            LOG_ERROR(("%s#%d: malloc failed\n",__FUNCTION__,__LINE__));
-         }
-      }
-      else {
-         SamplesRead = fread(ToneBuf,sizeof(int16),Samples,fp);
-      }
-
-      if(SilentThresholdTime > 0) {
-         Silent(ToneBuf, SamplesRead);
-         int LastTrip = TimeLapse(&LastSilentTrip);
-         if(Debug && bSilentNow) {
-            LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago, SilentThresholdTime %d ms\n",
-               __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip,SilentThresholdTime));
-         }
-         if(bSilentNow && LastTrip >= SilentThresholdTime) {
-            if(!bSilentBefore) {
-               Timer = TimeNow.tv_sec;
-               bSilentBefore = TRUE;
-	    }
-	    SamplesRead = -1;
-            if(Debug) {
-               LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago\n",
-                  __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip));
+        }else if(TimeNow.tv_sec - Timer > MaxPlayWithoutPause) {
+            // ... and now for a brief message from our sponsor ...
+            bFilePlaybackPause = TRUE;
+            Timer = TimeNow.tv_sec;
+        }
+    }
+    if(bFilePlaybackPause) {
+        SamplesRead = -1;
+    }else{
+        if(b8BitFile) {
+            char *TempBuf = (char *) malloc(Samples);
+            if(TempBuf != NULL) {
+                SamplesRead = fread(TempBuf,1,Samples,fp);
+                if(SamplesRead > 0) {
+                    for(int i = 0; i < SamplesRead; i++) {
+                        ToneBuf[i] = (TempBuf[i] - 0x80) << 8;
+                    }
+                }
+                free(TempBuf);
+            }else{
+                LOG_ERROR(("%s#%d: malloc failed\n",__FUNCTION__,__LINE__));
             }
-         }
-         else if(bSilentBefore) {
-            bSilentBefore = FALSE;
-            if(TimeNow.tv_sec - Timer < MinPlayBackPause) {
-	       bFilePlaybackPause = TRUE;
-	       SamplesRead = -1;
-	       bRew = FALSE;
-               if(b8BitFile) {
-                  RewSamples = -(SilentThresholdTime * 8);
-               }else{
-                  RewSamples = -(2 * SilentThresholdTime * 8);
-               }
-               if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
-                  LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
-               }
-	    }
-	 }
-      }
-
-      if(SamplesRead < Samples &&
-         SamplesRead > 0 &&
-	 MaxPlayWithoutPause != 0 &&
-	 MinPlayBackPause != 0) 
-      {
-      // Pause TX between files
-         bFilePlaybackPause = TRUE;
-         Timer = TimeNow.tv_sec;
-	 bRew = FALSE;
-      }else if(SamplesRead < Samples && SamplesRead != -1){
-         if(!feof(fp)) {
-            char *cp;
-            char CharSave;
-            if((cp = strchr(ToneChar,':')) != NULL) {
-               CharSave = *cp;
-               *cp = 0;
+        }else{
+            SamplesRead = fread(ToneBuf,sizeof(int16),Samples,fp);
+        }
+        if(SamplesRead < Samples) {
+            if(!feof(fp)) {
+                char *cp;
+                char CharSave;
+                if((cp = strchr(ToneChar,':')) != NULL) {
+                    CharSave = *cp;
+                    *cp = 0;
+                }
+                LOG_ERROR(("%s: error reading \"%s\" - %s \n",__FUNCTION__,
+                    ToneChar,strerror(errno)));
+                if(cp != NULL) {
+                    *cp = CharSave;
+                }
             }
-            LOG_ERROR(("%s: error reading \"%s\" - %s \n",__FUNCTION__,
-                       ToneChar,strerror(errno)));
-            if(cp != NULL) {
-               *cp = CharSave;
+            fclose(fp);
+            fp = NULL;
+            bFromFile = FALSE;
+            bRew = TRUE;
+        }
+        if(SilentThresholdTime > 0) {
+            Silent(ToneBuf, SamplesRead);
+            int LastTrip = TimeLapse(&LastSilentTrip);
+            if(Debug && bSilentNow) {
+                LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago, SilentThresholdTime %d ms\n",
+                    __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip,SilentThresholdTime));
             }
-         }
-         fclose(fp);
-         fp = NULL;
-         bFromFile = FALSE;
-	 bRew = TRUE;
-      }
-   }
-
-   return SamplesRead;
+            if(bSilentNow && LastTrip >= SilentThresholdTime) {
+                if(!bSilentBefore) {
+                    Timer = TimeNow.tv_sec;
+                    bSilentBefore = TRUE;
+                }
+                SamplesRead = -1;
+                if(Debug) {
+                    LOG_ERROR(("%s: SilentAveLevel: %d/%d, last trip %d ms ago\n",
+                        __FUNCTION__,SilentAveLevel,SilentThreshold,LastTrip));
+                }
+            }else if(bSilentBefore) {
+                bSilentBefore = FALSE;
+                if(TimeNow.tv_sec - Timer < MinPlayBackPause) {
+                    bFilePlaybackPause = TRUE;
+                    SamplesRead = -1;
+                    bRew = FALSE;
+                    if(b8BitFile) {
+                        RewSamples = -(SilentThresholdTime * 8);
+                    }else{
+                        RewSamples = -(2 * SilentThresholdTime * 8);
+                    }
+                    if(fseek(fp, RewSamples, SEEK_CUR) != 0) {
+                        LOG_ERROR(("%s#%d: fseek failed\n",__FUNCTION__,__LINE__));
+                    }
+                }
+            }
+        }
+        if(SamplesRead < Samples && SamplesRead > 0 && MaxPlayWithoutPause != 0 && MinPlayBackPause != 0) {
+            // Pause TX
+            bFilePlaybackPause = TRUE;
+            Timer = TimeNow.tv_sec;
+            bRew = FALSE;
+        }
+    }
+    return SamplesRead;
 }
 
 

@@ -101,7 +101,7 @@ Executive summary: (the usual)
     "tar xzf thelinkbox-{VERSION}.tgz"
     "cd thelinkbox-{VERSION}"
     "./bootstrap.sh
-    "./configure" (or "./configure --enable-usb")
+    "./configure" (or "./configure --enable-usb") (or on Debian 13 CFLAGS="-Wno-implicit-function-declaration" ./configure )
     "make"
     <edit the configuration files>
     <test>
